@@ -1,5 +1,5 @@
 import React from "react";
-import {Formik, Form, useField, Field, ErrorMessage} from "formik"; //формик с компонентами и пользовательским хуком
+import {Formik, Form, useField, Field, ErrorMessage, useFormikContext} from "formik"; //формик с компонентами и пользовательским хуком
 import * as Yup from 'yup' // валидация форм с помошью сторонней библиотеки Yup
 
 
@@ -20,7 +20,7 @@ const MyTextArea = ({label, ...props}) => {  // вынесенная общая 
     const [field] = useField(props) // получить доп данные (blur/error)
     return (
         <Composition label={label} props={props}>
-            <textarea className='text-area' {...field} {...props}/>  {/*то различие между input и textarea*/}
+            <textarea className='text-area' {...field}/>  {/*то различие между input и textarea*/}
         </Composition>
     )
 }
@@ -28,7 +28,7 @@ const MyTextInput = ({label, ...props}) => {  // вынесенная общая
     const [field, meta] = useField(props)
     return (
         <Composition label={label} props={props}>
-            <input className='text-input' {...field} {...props}/> {/*то различие между input и textarea*/}
+            <input className='text-input'  {...field}/> {/*то различие между input и textarea*/}
         </Composition>
     )
 }
@@ -58,6 +58,25 @@ const MySelect = ({label, ...props}) => {
         </div>
     )
 }
+
+export const DisplayFormikState = () => {
+    const props = useFormikContext();
+    return  <div style={{margin: '1rem 0'}}>
+        <h3 style={{fontFamily: 'monospace'}}/>
+        <pre
+            style={{
+                background: '#f6f8fa',
+                fontSize: '.65rem',
+                padding: '.5rem',
+            }}
+        >
+<strong>props</strong> ={' '}
+            {JSON.stringify({props}, null, 2)}
+</pre>
+    </div>;
+}
+
+
 
 const SignupForm = ({onSubmitForm}) => {
     return (
@@ -98,14 +117,20 @@ const SignupForm = ({onSubmitForm}) => {
                             .required('Required'),
                     }
                 )}
-                onSubmit={(values, {setSubmitting}) => {
+                onSubmit={(values) => {
                     setTimeout(() => {
                         alert(JSON.stringify(values, null, 2)); // после отправки формы вывести alert
                         onSubmitForm(values) // колбек, который принмает результат ввода формы
                     }, 400)
                 }}
             >
-                {({values}) => ( // обертка для вывода значений ввода в любом месте формы паралельно (или в итоге)
+                {({
+                      values,
+                      isSubmitting,
+                      handleReset,
+                      errors,
+                      isValid
+                }) => ( // обертка для вывода значений ввода в любом месте формы паралельно (или в итоге)
 
                     <Form>
 
@@ -174,7 +199,12 @@ const SignupForm = ({onSubmitForm}) => {
                             I accept the terms and conditions
                         </MyCheckbox>
 
-                        <button type='submit'>Submit</button>
+                        <button type="submit" disabled={!{isValid}}>
+                            Submit
+                        </button>
+                        <button type='button' onClick={handleReset}>Reset</button> {/*кнопка сбора со значениям по умолчанию*/}
+                        <DisplayFormikState />
+
                     </Form>
                 )}
             </Formik>
