@@ -1,0 +1,9 @@
+.errorText {
+    color: red;
+    margin: 0.5rem;
+
+}
+
+.errorInputTextArea {
+    border: 2px solid red;
+}
